@@ -63,7 +63,7 @@ def create_state(fs: int, channels: int, application: int) -> ctypes.Structure:
         ctypes.byref(result_code)
     )
 
-    if result_code.value is not opuslib.OK:
+    if result_code.value != opuslib.OK:
         raise opuslib.OpusError(result_code.value)
 
     return result

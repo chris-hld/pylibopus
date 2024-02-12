@@ -70,7 +70,7 @@ def create_state(fs: int, channels: int) -> ctypes.Structure:
         ctypes.byref(result_code)
     )
 
-    if result_code.value is not 0:
+    if result_code.value != opuslib.OK:
         raise opuslib.exceptions.OpusError(result_code.value)
 
     return decoder_state
