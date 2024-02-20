@@ -1,14 +1,16 @@
 python-opus
 ===========
 
-Python bindings to the libopus, IETF low-delay audio codec
+Python bindings to the libopus, IETF low-delay audio codec.
+
+**This fork also implements the Opus multichannel encoder and decoder.**
+
 
 Testing
 --------
 
-Run tests with a python setup.py test command or look for [Travis build logs](http://travis-ci.org/#!/svartalf/python-opus).
+Run tests with a python setup.py test command.
 
-![](https://secure.travis-ci.org/svartalf/python-opus.png)
 
 Contributing
 -------------
