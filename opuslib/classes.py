@@ -304,7 +304,7 @@ class Encoder(object):
         self.encoder_state, opuslib.api.ctl.get_inband_fec)
 
     def _set_inband_fec(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_inband_fec)
+        self.encoder_state, opuslib.api.ctl.set_inband_fec, x)
 
     inband_fec = property(_get_inband_fec, _set_inband_fec)
 
@@ -526,7 +526,7 @@ class MultiStreamEncoder(object):
 
     def _set_inband_fec(self, x): return \
         opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_inband_fec)
+        self.msencoder_state, opuslib.api.ctl.set_inband_fec, x)
 
     inband_fec = property(_get_inband_fec, _set_inband_fec)
 
