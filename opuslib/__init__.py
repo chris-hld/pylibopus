@@ -22,7 +22,10 @@ from .constants import *  # NOQA
 
 from .constants import OK, APPLICATION_TYPES_MAP  # NOQA
 
-from .classes import Encoder, Decoder, MultiStreamEncoder, MultiStreamDecoder  # NOQA
+from .classes import Encoder, Decoder  # NOQA
+from .classes import MultiStreamEncoder, MultiStreamDecoder  # NOQA
+from .classes import ProjectionEncoder, ProjectionDecoder  # NOQA
+
 
 __author__ = 'Никита Кузнецов <self@svartalf.info>'
 __copyright__ = 'Copyright (c) 2012, SvartalF'

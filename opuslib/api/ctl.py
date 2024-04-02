@@ -196,4 +196,9 @@ get_dtx = get(opuslib.GET_DTX_REQUEST, ctypes.c_int)
 # Other stuff
 #
 
+# get projection demixing matrix size
+get_demixing_matrix_size = get(
+    opuslib.OPUS_PROJECTION_GET_DEMIXING_MATRIX_SIZE_REQUEST, ctypes.c_int)
+
+
 unimplemented = query(opuslib.UNIMPLEMENTED)
