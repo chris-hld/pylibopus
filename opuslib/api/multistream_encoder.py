@@ -30,7 +30,7 @@ MultiStreamEncoderPointer = ctypes.POINTER(MultiStreamEncoder)
 
 
 libopus_get_size = opuslib.api.libopus.opus_multistream_encoder_get_size
-libopus_get_size.argtypes = (ctypes.c_int,)  # must be sequence (,) of types!
+libopus_get_size.argtypes = (ctypes.c_int, ctypes.c_int)
 libopus_get_size.restype = ctypes.c_int
 
 
@@ -55,7 +55,7 @@ libopus_create.restype = MultiStreamEncoderPointer
 
 def create_state(fs: int, channels: int, streams: int, coupled_streams: int,
                  mapping: list, application: int) -> ctypes.Structure:
-    """Allocates and initializes an multi-stream encoder state."""
+    """Allocates and initializes a multi-stream encoder state."""
     result_code = ctypes.c_int()
     _umapping = (ctypes.c_ubyte * len(mapping))(*mapping)
 

@@ -30,9 +30,9 @@ MultiStreamDecoderPointer = ctypes.POINTER(MultiStreamDecoder)
 
 
 libopus_get_size = opuslib.api.libopus.opus_multistream_decoder_get_size
-libopus_get_size.argtypes = (ctypes.c_int,)
+libopus_get_size.argtypes = (ctypes.c_int, ctypes.c_int)
 libopus_get_size.restype = ctypes.c_int
-libopus_get_size.__doc__ = 'Gets the size of an MutliStreamOpusDecoder structure'
+libopus_get_size.__doc__ = 'Gets the size of an OpusMSEncoder structure'
 
 
 libopus_create = opuslib.api.libopus.opus_multistream_decoder_create
