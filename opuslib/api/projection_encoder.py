@@ -188,6 +188,7 @@ def get_demixing_matrix(
 
 
 libopus_ctl = opuslib.api.libopus.opus_projection_encoder_ctl
+libopus_ctl.argtypes = [ProjectionEncoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
 

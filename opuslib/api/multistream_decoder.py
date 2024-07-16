@@ -181,6 +181,7 @@ def decode_float(  # pylint: disable=too-many-arguments
 
 
 libopus_ctl = opuslib.api.libopus.opus_multistream_decoder_ctl
+libopus_ctl.argtypes = [MultiStreamDecoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
 

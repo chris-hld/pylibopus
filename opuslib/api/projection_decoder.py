@@ -175,6 +175,7 @@ def decode_float(  # pylint: disable=too-many-arguments
 
 
 libopus_ctl = opuslib.api.libopus.opus_projection_decoder_ctl
+libopus_ctl.argtypes = [ProjectionDecoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
 

@@ -171,6 +171,7 @@ def encode_float(
 
 
 libopus_ctl = opuslib.api.libopus.opus_multistream_encoder_ctl
+libopus_ctl.argtypes = [MultiStreamEncoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
 
