@@ -76,37 +76,6 @@ def create_state(fs: int, channels: int, mapping_family: int, streams: int,
     return encoder_state
 
 
-libopus_ctl = opuslib.api.libopus.opus_projection_encoder_ctl
-libopus_ctl.restype = ctypes.c_int
-
-
-# FIXME: Remove typing.Any once we have a stub for ctypes
-def encoder_ctl(
-        encoder_state: ctypes.Structure,
-        request,
-        value=None
-) -> typing.Union[int, typing.Any]:
-    if value is not None:
-        return request(libopus_ctl, encoder_state, value)
-    return request(libopus_ctl, encoder_state)
-
-
-def get_demixing_matrix(
-        encoder_state: ctypes.Structure,
-        matrix_size
-) -> typing.Union[int, typing.Any]:
-    matrix = (ctypes.c_ubyte * matrix_size)()
-    pmatrix = ctypes.cast(matrix, opuslib.api.c_ubyte_pointer)
-    ret = libopus_ctl(
-        encoder_state,
-        opuslib.OPUS_PROJECTION_GET_DEMIXING_MATRIX_REQUEST,
-        pmatrix,
-        matrix_size)
-    if ret != opuslib.OK:
-        raise opuslib.OpusError(ret)
-    return matrix
-
-
 libopus_projection_encode = opuslib.api.libopus.opus_projection_encode
 libopus_projection_encode.argtypes = (
     ProjectionEncoderPointer,
@@ -200,6 +169,37 @@ def encode_float(
             'Encoder returned result="{}"'.format(result))
 
     return array.array('b', opus_data[:result]).tobytes()
+
+
+def get_demixing_matrix(
+        encoder_state: ctypes.Structure,
+        matrix_size
+) -> typing.Union[int, typing.Any]:
+    matrix = (ctypes.c_ubyte * matrix_size)()
+    pmatrix = ctypes.cast(matrix, opuslib.api.c_ubyte_pointer)
+    ret = libopus_ctl(
+        encoder_state,
+        opuslib.OPUS_PROJECTION_GET_DEMIXING_MATRIX_REQUEST,
+        pmatrix,
+        matrix_size)
+    if ret != opuslib.OK:
+        raise opuslib.OpusError(ret)
+    return matrix
+
+
+libopus_ctl = opuslib.api.libopus.opus_projection_encoder_ctl
+libopus_ctl.restype = ctypes.c_int
+
+
+# FIXME: Remove typing.Any once we have a stub for ctypes
+def encoder_ctl(
+        encoder_state: ctypes.Structure,
+        request,
+        value=None
+) -> typing.Union[int, typing.Any]:
+    if value is not None:
+        return request(libopus_ctl, encoder_state, value)
+    return request(libopus_ctl, encoder_state)
 
 
 destroy = opuslib.api.libopus.opus_projection_encoder_destroy

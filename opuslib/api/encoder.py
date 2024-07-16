@@ -69,21 +69,6 @@ def create_state(fs: int, channels: int, application: int) -> ctypes.Structure:
     return result
 
 
-libopus_ctl = opuslib.api.libopus.opus_encoder_ctl
-libopus_ctl.restype = ctypes.c_int
-
-
-# FIXME: Remove typing.Any once we have a stub for ctypes
-def encoder_ctl(
-        encoder_state: ctypes.Structure,
-        request,
-        value=None
-) -> typing.Union[int, typing.Any]:
-    if value is not None:
-        return request(libopus_ctl, encoder_state, value)
-    return request(libopus_ctl, encoder_state)
-
-
 libopus_encode = opuslib.api.libopus.opus_encode
 libopus_encode.argtypes = (
     EncoderPointer,
@@ -177,6 +162,21 @@ def encode_float(
             'Encoder returned result="{}"'.format(result))
 
     return array.array('b', opus_data[:result]).tobytes()
+
+
+libopus_ctl = opuslib.api.libopus.opus_encoder_ctl
+libopus_ctl.restype = ctypes.c_int
+
+
+# FIXME: Remove typing.Any once we have a stub for ctypes
+def encoder_ctl(
+        encoder_state: ctypes.Structure,
+        request,
+        value=None
+) -> typing.Union[int, typing.Any]:
+    if value is not None:
+        return request(libopus_ctl, encoder_state, value)
+    return request(libopus_ctl, encoder_state)
 
 
 destroy = opuslib.api.libopus.opus_encoder_destroy

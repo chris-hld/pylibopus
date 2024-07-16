@@ -21,121 +21,6 @@ __copyright__ = 'Copyright (c) 2012, SvartalF'
 __license__ = 'BSD 3-Clause License'
 
 
-class Decoder(object):
-
-    """High-Level Decoder Object."""
-
-    def __init__(self, fs: int, channels: int) -> None:
-        """
-        :param fs: Sample Rate.
-        :param channels: Number of channels.
-        """
-        self._fs = fs
-        self._channels = channels
-        self.decoder_state = opuslib.api.decoder.create_state(fs, channels)
-
-    def __del__(self) -> None:
-        if hasattr(self, 'decoder_state'):
-            # Destroying state only if __init__ completed successfully
-            opuslib.api.decoder.destroy(self.decoder_state)
-
-    def reset_state(self) -> None:
-        """
-        Resets the codec state to be equivalent to a freshly initialized state
-        """
-        opuslib.api.decoder.decoder_ctl(
-            self.decoder_state,
-            opuslib.api.ctl.reset_state
-        )
-
-    # FIXME: Remove typing.Any once we have a stub for ctypes
-    def decode(
-        self,
-        opus_data: bytes,
-        frame_size: int,
-        decode_fec: bool = False
-    ) -> typing.Union[bytes, typing.Any]:
-        """
-        Decodes given Opus data to PCM.
-        """
-        return opuslib.api.decoder.decode(
-            self.decoder_state,
-            opus_data,
-            len(opus_data),
-            frame_size,
-            decode_fec,
-            channels=self._channels
-        )
-
-    # FIXME: Remove typing.Any once we have a stub for ctypes
-    def decode_float(
-        self,
-        opus_data: bytes,
-        frame_size: int,
-        decode_fec: bool = False
-    ) -> typing.Union[bytes, typing.Any]:
-        """
-        Decodes given Opus data to PCM.
-        """
-        return opuslib.api.decoder.decode_float(
-            self.decoder_state,
-            opus_data,
-            len(opus_data),
-            frame_size,
-            decode_fec,
-            channels=self._channels
-        )
-
-    # CTL interfaces
-
-    def _get_final_range(self): return opuslib.api.decoder.decoder_ctl(
-        self.decoder_state,
-        opuslib.api.ctl.get_final_range
-    )
-
-    final_range = property(_get_final_range)
-
-    def _get_bandwidth(self): return opuslib.api.decoder.decoder_ctl(
-        self.decoder_state,
-        opuslib.api.ctl.get_bandwidth
-    )
-
-    bandwidth = property(_get_bandwidth)
-
-    def _get_pitch(self): return opuslib.api.decoder.decoder_ctl(
-        self.decoder_state,
-        opuslib.api.ctl.get_pitch
-    )
-
-    pitch = property(_get_pitch)
-
-    def _get_lsb_depth(self): return opuslib.api.decoder.decoder_ctl(
-        self.decoder_state,
-        opuslib.api.ctl.get_lsb_depth
-    )
-
-    def _set_lsb_depth(self, x): return opuslib.api.decoder.decoder_ctl(
-        self.decoder_state,
-        opuslib.api.ctl.set_lsb_depth,
-        x
-    )
-
-    lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
-
-    def _get_gain(self): return opuslib.api.decoder.decoder_ctl(
-        self.decoder_state,
-        opuslib.api.ctl.get_gain
-    )
-
-    def _set_gain(self, x): return opuslib.api.decoder.decoder_ctl(
-        self.decoder_state,
-        opuslib.api.ctl.set_gain,
-        x
-    )
-
-    gain = property(_get_gain, _set_gain)
-
-
 class Encoder(object):
 
     """High-Level Encoder Object."""
@@ -325,6 +210,121 @@ class Encoder(object):
         self.encoder_state, opuslib.api.ctl.set_dtx, x)
 
     dtx = property(_get_dtx, _set_dtx)
+
+
+class Decoder(object):
+
+    """High-Level Decoder Object."""
+
+    def __init__(self, fs: int, channels: int) -> None:
+        """
+        :param fs: Sample Rate.
+        :param channels: Number of channels.
+        """
+        self._fs = fs
+        self._channels = channels
+        self.decoder_state = opuslib.api.decoder.create_state(fs, channels)
+
+    def __del__(self) -> None:
+        if hasattr(self, 'decoder_state'):
+            # Destroying state only if __init__ completed successfully
+            opuslib.api.decoder.destroy(self.decoder_state)
+
+    def reset_state(self) -> None:
+        """
+        Resets the codec state to be equivalent to a freshly initialized state
+        """
+        opuslib.api.decoder.decoder_ctl(
+            self.decoder_state,
+            opuslib.api.ctl.reset_state
+        )
+
+    # FIXME: Remove typing.Any once we have a stub for ctypes
+    def decode(
+        self,
+        opus_data: bytes,
+        frame_size: int,
+        decode_fec: bool = False
+    ) -> typing.Union[bytes, typing.Any]:
+        """
+        Decodes given Opus data to PCM.
+        """
+        return opuslib.api.decoder.decode(
+            self.decoder_state,
+            opus_data,
+            len(opus_data),
+            frame_size,
+            decode_fec,
+            channels=self._channels
+        )
+
+    # FIXME: Remove typing.Any once we have a stub for ctypes
+    def decode_float(
+        self,
+        opus_data: bytes,
+        frame_size: int,
+        decode_fec: bool = False
+    ) -> typing.Union[bytes, typing.Any]:
+        """
+        Decodes given Opus data to PCM.
+        """
+        return opuslib.api.decoder.decode_float(
+            self.decoder_state,
+            opus_data,
+            len(opus_data),
+            frame_size,
+            decode_fec,
+            channels=self._channels
+        )
+
+    # CTL interfaces
+
+    def _get_final_range(self): return opuslib.api.decoder.decoder_ctl(
+        self.decoder_state,
+        opuslib.api.ctl.get_final_range
+    )
+
+    final_range = property(_get_final_range)
+
+    def _get_bandwidth(self): return opuslib.api.decoder.decoder_ctl(
+        self.decoder_state,
+        opuslib.api.ctl.get_bandwidth
+    )
+
+    bandwidth = property(_get_bandwidth)
+
+    def _get_pitch(self): return opuslib.api.decoder.decoder_ctl(
+        self.decoder_state,
+        opuslib.api.ctl.get_pitch
+    )
+
+    pitch = property(_get_pitch)
+
+    def _get_lsb_depth(self): return opuslib.api.decoder.decoder_ctl(
+        self.decoder_state,
+        opuslib.api.ctl.get_lsb_depth
+    )
+
+    def _set_lsb_depth(self, x): return opuslib.api.decoder.decoder_ctl(
+        self.decoder_state,
+        opuslib.api.ctl.set_lsb_depth,
+        x
+    )
+
+    lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
+
+    def _get_gain(self): return opuslib.api.decoder.decoder_ctl(
+        self.decoder_state,
+        opuslib.api.ctl.get_gain
+    )
+
+    def _set_gain(self, x): return opuslib.api.decoder.decoder_ctl(
+        self.decoder_state,
+        opuslib.api.ctl.set_gain,
+        x
+    )
+
+    gain = property(_get_gain, _set_gain)
 
 
 class MultiStreamEncoder(object):
