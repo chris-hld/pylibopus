@@ -11,80 +11,79 @@ import array
 import ctypes  # type: ignore
 import typing
 
-import opuslib
-import opuslib.api
+import pylibopus
+import pylibopus.api
 
 __author__ = 'Chris Hold'
 __copyright__ = 'Copyright (c) 2024, Chris Hold'
 __license__ = 'BSD 3-Clause License'
 
 
-class ProjectionEncoder(ctypes.Structure):  # pylint: disable=too-few-public-methods
-    """Opus projection encoder state.
+class MultiStreamEncoder(ctypes.Structure):  # pylint: disable=too-few-public-methods
+    """Opus multi-stream encoder state.
     This contains the complete state of an Opus encoder.
     """
     pass
 
 
-ProjectionEncoderPointer = ctypes.POINTER(ProjectionEncoder)
+MultiStreamEncoderPointer = ctypes.POINTER(MultiStreamEncoder)
 
 
-libopus_get_size = opuslib.api.libopus.opus_projection_ambisonics_encoder_get_size
+libopus_get_size = pylibopus.api.libopus.opus_multistream_encoder_get_size
 libopus_get_size.argtypes = (ctypes.c_int, ctypes.c_int)
 libopus_get_size.restype = ctypes.c_int
 
 
 # FIXME: Remove typing.Any once we have a stub for ctypes
-def get_size(channels: int, mapping_family: int) -> typing.Union[int, typing.Any]:
-    """Gets the size of an ProjectionOpusEncoder structure."""
-    return libopus_get_size(channels, mapping_family)
+def get_size(streams: int, coupled_streams: int) -> typing.Union[int, typing.Any]:
+    """Gets the size of an MultiStreamOpusEncoder structure."""
+    return libopus_get_size(streams, coupled_streams)
 
 
-libopus_create = opuslib.api.libopus.opus_projection_ambisonics_encoder_create
+libopus_create = pylibopus.api.libopus.opus_multistream_encoder_create
 libopus_create.argtypes = (
     ctypes.c_int,  # fs
     ctypes.c_int,  # channels
-    ctypes.c_int,  # mapping_family
-    opuslib.api.c_int_pointer,  # streams
-    opuslib.api.c_int_pointer,  # coupled streams
+    ctypes.c_int,  # streams
+    ctypes.c_int,  # coupled streams
+    pylibopus.api.c_ubyte_pointer,  # mapping
     ctypes.c_int,  # application
-    opuslib.api.c_int_pointer  # error
+    pylibopus.api.c_int_pointer  # error
 )
-libopus_create.restype = ProjectionEncoderPointer
+libopus_create.restype = MultiStreamEncoderPointer
 
 
-def create_state(fs: int, channels: int, mapping_family: int, streams: int,
-                 coupled_streams: int, application: int) -> ctypes.Structure:
-    """Allocates and initializes a projection encoder state."""
+def create_state(fs: int, channels: int, streams: int, coupled_streams: int,
+                 mapping: list, application: int) -> ctypes.Structure:
+    """Allocates and initializes a multi-stream encoder state."""
     result_code = ctypes.c_int()
-    streams_ = ctypes.c_int(streams)
-    coupled_streams_ = ctypes.c_int(coupled_streams)
+    _umapping = (ctypes.c_ubyte * len(mapping))(*mapping)
 
     encoder_state = libopus_create(
         fs,
         channels,
-        mapping_family,
-        streams_,
-        coupled_streams_,
+        streams,
+        coupled_streams,
+        _umapping,
         application,
         ctypes.byref(result_code)
     )
 
-    if result_code.value != opuslib.OK:
-        raise opuslib.OpusError(result_code.value)
+    if result_code.value != pylibopus.OK:
+        raise pylibopus.OpusError(result_code.value)
 
     return encoder_state
 
 
-libopus_projection_encode = opuslib.api.libopus.opus_projection_encode
-libopus_projection_encode.argtypes = (
-    ProjectionEncoderPointer,
-    opuslib.api.c_int16_pointer,
+libopus_multistream_encode = pylibopus.api.libopus.opus_multistream_encode
+libopus_multistream_encode.argtypes = (
+    MultiStreamEncoderPointer,
+    pylibopus.api.c_int16_pointer,
     ctypes.c_int,
     ctypes.c_char_p,
     ctypes.c_int32
 )
-libopus_projection_encode.restype = ctypes.c_int32
+libopus_multistream_encode.restype = ctypes.c_int32
 
 
 # FIXME: Remove typing.Any once we have a stub for ctypes
@@ -116,10 +115,10 @@ def encode(
         instant bitrate, but should not be used as the only bitrate control.
         Use OPUS_SET_BITRATE to control the bitrate.
     """
-    pcm_pointer = ctypes.cast(pcm_data, opuslib.api.c_int16_pointer)
+    pcm_pointer = ctypes.cast(pcm_data, pylibopus.api.c_int16_pointer)
     opus_data = (ctypes.c_char * max_data_bytes)()
 
-    result = libopus_projection_encode(
+    result = libopus_multistream_encode(
         encoder_state,
         pcm_pointer,
         frame_size,
@@ -128,21 +127,21 @@ def encode(
     )
 
     if result < 0:
-        raise opuslib.OpusError(
+        raise pylibopus.OpusError(
             'Opus Encoder returned result="{}"'.format(result))
 
     return array.array('b', opus_data[:result]).tobytes()
 
 
-libopus_projection_encode_float = opuslib.api.libopus.opus_projection_encode_float
-libopus_projection_encode_float.argtypes = (
-    ProjectionEncoderPointer,
-    opuslib.api.c_float_pointer,
+libopus_multistream_encode_float = pylibopus.api.libopus.opus_multistream_encode_float
+libopus_multistream_encode_float.argtypes = (
+    MultiStreamEncoderPointer,
+    pylibopus.api.c_float_pointer,
     ctypes.c_int,
     ctypes.c_char_p,
     ctypes.c_int32
 )
-libopus_projection_encode_float.restype = ctypes.c_int32
+libopus_multistream_encode_float.restype = ctypes.c_int32
 
 
 # FIXME: Remove typing.Any once we have a stub for ctypes
@@ -153,10 +152,10 @@ def encode_float(
         max_data_bytes: int
 ) -> typing.Union[bytes, typing.Any]:
     """Encodes an Opus frame from floating point input"""
-    pcm_pointer = ctypes.cast(pcm_data, opuslib.api.c_float_pointer)
+    pcm_pointer = ctypes.cast(pcm_data, pylibopus.api.c_float_pointer)
     opus_data = (ctypes.c_char * max_data_bytes)()
 
-    result = libopus_projection_encode_float(
+    result = libopus_multistream_encode_float(
         encoder_state,
         pcm_pointer,
         frame_size,
@@ -165,30 +164,14 @@ def encode_float(
     )
 
     if result < 0:
-        raise opuslib.OpusError(
+        raise pylibopus.OpusError(
             'Encoder returned result="{}"'.format(result))
 
     return array.array('b', opus_data[:result]).tobytes()
 
 
-def get_demixing_matrix(
-        encoder_state: ctypes.Structure,
-        matrix_size
-) -> typing.Union[int, typing.Any]:
-    matrix = (ctypes.c_ubyte * matrix_size)()
-    pmatrix = ctypes.cast(matrix, opuslib.api.c_ubyte_pointer)
-    ret = libopus_ctl(
-        encoder_state,
-        opuslib.OPUS_PROJECTION_GET_DEMIXING_MATRIX_REQUEST,
-        pmatrix,
-        matrix_size)
-    if ret != opuslib.OK:
-        raise opuslib.OpusError(ret)
-    return matrix
-
-
-libopus_ctl = opuslib.api.libopus.opus_projection_encoder_ctl
-libopus_ctl.argtypes = [ProjectionEncoderPointer, ctypes.c_int,]  # variadic
+libopus_ctl = pylibopus.api.libopus.opus_multistream_encoder_ctl
+libopus_ctl.argtypes = [MultiStreamEncoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
 
@@ -203,7 +186,7 @@ def encoder_ctl(
     return request(libopus_ctl, encoder_state)
 
 
-destroy = opuslib.api.libopus.opus_projection_encoder_destroy
-destroy.argtypes = (ProjectionEncoderPointer,)  # must be sequence (,) of types!
+destroy = pylibopus.api.libopus.opus_multistream_encoder_destroy
+destroy.argtypes = (MultiStreamEncoderPointer,)  # must be sequence (,) of types!
 destroy.restype = None
-destroy.__doc__ = "Frees an OpusEncoder allocated by opus_projection_encoder_create()"
+destroy.__doc__ = "Frees an OpusEncoder allocated by opus_multistream_encoder_create()"

@@ -11,8 +11,8 @@ import array
 import ctypes  # type: ignore
 import typing
 
-import opuslib
-import opuslib.api
+import pylibopus
+import pylibopus.api
 
 __author__ = 'Никита Кузнецов <self@svartalf.info>'
 __copyright__ = 'Copyright (c) 2012, SvartalF'
@@ -29,17 +29,17 @@ class Decoder(ctypes.Structure):
 DecoderPointer = ctypes.POINTER(Decoder)
 
 
-libopus_get_size = opuslib.api.libopus.opus_decoder_get_size
+libopus_get_size = pylibopus.api.libopus.opus_decoder_get_size
 libopus_get_size.argtypes = (ctypes.c_int,)
 libopus_get_size.restype = ctypes.c_int
 libopus_get_size.__doc__ = 'Gets the size of an OpusDecoder structure'
 
 
-libopus_create = opuslib.api.libopus.opus_decoder_create
+libopus_create = pylibopus.api.libopus.opus_decoder_create
 libopus_create.argtypes = (
     ctypes.c_int,
     ctypes.c_int,
-    opuslib.api.c_int_pointer
+    pylibopus.api.c_int_pointer
 )
 libopus_create.restype = DecoderPointer
 
@@ -70,13 +70,13 @@ def create_state(fs: int, channels: int) -> ctypes.Structure:
         ctypes.byref(result_code)
     )
 
-    if result_code.value != opuslib.OK:
-        raise opuslib.exceptions.OpusError(result_code.value)
+    if result_code.value != pylibopus.OK:
+        raise pylibopus.exceptions.OpusError(result_code.value)
 
     return decoder_state
 
 
-libopus_packet_get_bandwidth = opuslib.api.libopus.opus_packet_get_bandwidth
+libopus_packet_get_bandwidth = pylibopus.api.libopus.opus_packet_get_bandwidth
 # `argtypes` must be a sequence (,) of types!
 libopus_packet_get_bandwidth.argtypes = (ctypes.c_char_p,)
 libopus_packet_get_bandwidth.restype = ctypes.c_int
@@ -90,12 +90,12 @@ def packet_get_bandwidth(data: bytes) -> typing.Union[int, typing.Any]:
     result = libopus_packet_get_bandwidth(data_pointer)
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return result
 
 
-libopus_packet_get_nb_channels = opuslib.api.libopus.opus_packet_get_nb_channels  # NOQA
+libopus_packet_get_nb_channels = pylibopus.api.libopus.opus_packet_get_nb_channels  # NOQA
 # `argtypes` must be a sequence (,) of types!
 libopus_packet_get_nb_channels.argtypes = (ctypes.c_char_p,)
 libopus_packet_get_nb_channels.restype = ctypes.c_int
@@ -109,12 +109,12 @@ def packet_get_nb_channels(data: bytes) -> typing.Union[int, typing.Any]:
     result = libopus_packet_get_nb_channels(data_pointer)
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return result
 
 
-libopus_packet_get_nb_frames = opuslib.api.libopus.opus_packet_get_nb_frames
+libopus_packet_get_nb_frames = pylibopus.api.libopus.opus_packet_get_nb_frames
 libopus_packet_get_nb_frames.argtypes = (ctypes.c_char_p, ctypes.c_int)
 libopus_packet_get_nb_frames.restype = ctypes.c_int
 
@@ -133,13 +133,13 @@ def packet_get_nb_frames(
     result = libopus_packet_get_nb_frames(data_pointer, ctypes.c_int(length))
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return result
 
 
 libopus_packet_get_samples_per_frame = \
-    opuslib.api.libopus.opus_packet_get_samples_per_frame
+    pylibopus.api.libopus.opus_packet_get_samples_per_frame
 libopus_packet_get_samples_per_frame.argtypes = (ctypes.c_char_p, ctypes.c_int)
 libopus_packet_get_samples_per_frame.restype = ctypes.c_int
 
@@ -155,12 +155,12 @@ def packet_get_samples_per_frame(
     result = libopus_packet_get_nb_frames(data_pointer, ctypes.c_int(fs))
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return result
 
 
-libopus_get_nb_samples = opuslib.api.libopus.opus_decoder_get_nb_samples
+libopus_get_nb_samples = pylibopus.api.libopus.opus_decoder_get_nb_samples
 libopus_get_nb_samples.argtypes = (
     DecoderPointer,
     ctypes.c_char_p,
@@ -194,17 +194,17 @@ def get_nb_samples(
     result = libopus_get_nb_samples(decoder_state, packet, length)
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return result
 
 
-libopus_decode = opuslib.api.libopus.opus_decode
+libopus_decode = pylibopus.api.libopus.opus_decode
 libopus_decode.argtypes = (
     DecoderPointer,
     ctypes.c_char_p,
     ctypes.c_int32,
-    opuslib.api.c_int16_pointer,
+    pylibopus.api.c_int16_pointer,
     ctypes.c_int,
     ctypes.c_int
 )
@@ -231,7 +231,7 @@ def decode(  # pylint: disable=too-many-arguments
 
     pcm_size = frame_size * channels * ctypes.sizeof(ctypes.c_int16)
     pcm = (ctypes.c_int16 * pcm_size)()
-    pcm_pointer = ctypes.cast(pcm, opuslib.api.c_int16_pointer)
+    pcm_pointer = ctypes.cast(pcm, pylibopus.api.c_int16_pointer)
 
     result = libopus_decode(
         decoder_state,
@@ -243,17 +243,17 @@ def decode(  # pylint: disable=too-many-arguments
     )
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return array.array('h', pcm_pointer[:result * channels]).tobytes()
 
 
-libopus_decode_float = opuslib.api.libopus.opus_decode_float
+libopus_decode_float = pylibopus.api.libopus.opus_decode_float
 libopus_decode_float.argtypes = (
     DecoderPointer,
     ctypes.c_char_p,
     ctypes.c_int32,
-    opuslib.api.c_float_pointer,
+    pylibopus.api.c_float_pointer,
     ctypes.c_int,
     ctypes.c_int
 )
@@ -279,7 +279,7 @@ def decode_float(  # pylint: disable=too-many-arguments
 
     pcm_size = frame_size * channels * ctypes.sizeof(ctypes.c_float)
     pcm = (ctypes.c_float * pcm_size)()
-    pcm_pointer = ctypes.cast(pcm, opuslib.api.c_float_pointer)
+    pcm_pointer = ctypes.cast(pcm, pylibopus.api.c_float_pointer)
 
     result = libopus_decode_float(
         decoder_state,
@@ -291,12 +291,12 @@ def decode_float(  # pylint: disable=too-many-arguments
     )
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return array.array('f', pcm[:result * channels]).tobytes()
 
 
-libopus_ctl = opuslib.api.libopus.opus_decoder_ctl
+libopus_ctl = pylibopus.api.libopus.opus_decoder_ctl
 libopus_ctl.argtypes = [DecoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
@@ -312,7 +312,7 @@ def decoder_ctl(
     return request(libopus_ctl, decoder_state)
 
 
-destroy = opuslib.api.libopus.opus_decoder_destroy
+destroy = pylibopus.api.libopus.opus_decoder_destroy
 destroy.argtypes = (DecoderPointer,)
 destroy.restype = None
 destroy.__doc__ = 'Frees an OpusDecoder allocated by opus_decoder_create()'

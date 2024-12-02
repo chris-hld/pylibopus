@@ -1,26 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""OpusLib Package."""
+"""Python libopus Package."""
 
 import setuptools  # type: ignore
 
-__author__ = 'Никита Кузнецов <self@svartalf.info>'
-__copyright__ = 'Copyright (c) 2012, SvartalF'
-__license__ = 'BSD 3-Clause License'
-
-
 setuptools.setup(
-    name='opuslib',
-    version='3.0.4',
+    name='pylibopus',
+    version='3.0.5',
     author='Никита Кузнецов',
     author_email='self@svartalf.info',
-    maintainer='Orion Labs, Inc.',
-    maintainer_email='code@orionlabs.io',
+    maintainer='Chris Hold',
+    maintainer_email='info@chrisholdaudio.com',
     license='BSD 3-Clause License',
-    url='https://github.com/onbeep/opuslib',
+    url='https://github.com/chris-hld/pylibopus',
     description='Python bindings to the libopus, IETF low-delay audio codec',
-    packages=('opuslib', 'opuslib.api'),
+    packages=('pylibopus', 'pylibopus.api'),
     test_suite='tests',
     zip_safe=False,
     tests_require=[

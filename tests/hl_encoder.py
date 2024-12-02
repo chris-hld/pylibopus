@@ -7,7 +7,7 @@
 
 import unittest
 
-import opuslib
+import pylibopus
 
 __author__ = 'Никита Кузнецов <self@svartalf.info>'
 __copyright__ = 'Copyright (c) 2012, SvartalF'
@@ -18,13 +18,13 @@ class EncoderTest(unittest.TestCase):
 
     def test_create(self):
         try:
-            opuslib.Encoder(1000, 3, opuslib.APPLICATION_AUDIO)
-        except opuslib.OpusError as ex:
-            self.assertEqual(ex.code, opuslib.BAD_ARG)
+            pylibopus.Encoder(1000, 3, pylibopus.APPLICATION_AUDIO)
+        except pylibopus.OpusError as ex:
+            self.assertEqual(ex.code, pylibopus.BAD_ARG)
 
-        opuslib.Encoder(48000, 2, opuslib.APPLICATION_AUDIO)
+        pylibopus.Encoder(48000, 2, pylibopus.APPLICATION_AUDIO)
 
     @classmethod
     def test_reset_state(cls):
-        encoder = opuslib.Encoder(48000, 2, opuslib.APPLICATION_AUDIO)
+        encoder = pylibopus.Encoder(48000, 2, pylibopus.APPLICATION_AUDIO)
         encoder.reset_state()

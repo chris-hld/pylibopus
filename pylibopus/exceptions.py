@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-Exceptions for OpusLib.
+Exceptions for pylibopus.
 """
 
 import typing
 
-import opuslib.api.info
+import pylibopus.api.info
 
 __author__ = 'Никита Кузнецов <self@svartalf.info>'
 __copyright__ = 'Copyright (c) 2012, SvartalF'
@@ -17,7 +17,7 @@ __license__ = 'BSD 3-Clause License'
 class OpusError(Exception):
 
     """
-    Generic handler for OpusLib errors from C library.
+    Generic handler for pylibopus errors from C library.
     """
 
     def __init__(self, code: int) -> None:
@@ -26,4 +26,4 @@ class OpusError(Exception):
 
     # FIXME: Remove typing.Any once we have a stub for ctypes
     def __str__(self) -> typing.Union[str, typing.Any]:
-        return str(opuslib.api.info.strerror(self.code))
+        return str(pylibopus.api.info.strerror(self.code))

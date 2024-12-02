@@ -14,13 +14,24 @@ __copyright__ = 'Copyright (c) 2012, SvartalF'
 __license__ = 'BSD 3-Clause License'
 
 
-lib_location = find_library('opus')
+lib_location = None
+libopus = None
 
-if lib_location is None:
-    raise Exception(
-        'Could not find Opus library. Make sure it is installed.')
 
-libopus = ctypes.CDLL(lib_location)
+def set_lib(path):
+    new_lib_location = find_library(path)
+    if new_lib_location is None:
+        raise Exception(
+            'Could not find Opus library. Make sure it is installed.')
+    else:
+        global lib_location
+        global libopus
+        lib_location = new_lib_location
+        libopus = ctypes.CDLL(lib_location)
+
+
+set_lib('opus')
+
 
 c_int_pointer = ctypes.POINTER(ctypes.c_int)
 c_int16_pointer = ctypes.POINTER(ctypes.c_int16)

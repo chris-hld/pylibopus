@@ -11,78 +11,84 @@ import array
 import ctypes  # type: ignore
 import typing
 
-import opuslib
-import opuslib.api
+import pylibopus
+import pylibopus.api
 
 __author__ = 'Chris Hold>'
 __copyright__ = 'Copyright (c) 2024, Chris Hold'
 __license__ = 'BSD 3-Clause License'
 
 
-class ProjectionDecoder(ctypes.Structure):
+class MultiStreamDecoder(ctypes.Structure):
     """Opus multi-stream decoder state.
     This contains the complete state of an Opus decoder.
     """
     pass
 
 
-ProjectionDecoderPointer = ctypes.POINTER(ProjectionDecoder)
+MultiStreamDecoderPointer = ctypes.POINTER(MultiStreamDecoder)
 
 
-libopus_get_size = opuslib.api.libopus.opus_projection_decoder_get_size
+libopus_get_size = pylibopus.api.libopus.opus_multistream_decoder_get_size
 libopus_get_size.argtypes = (ctypes.c_int, ctypes.c_int)
 libopus_get_size.restype = ctypes.c_int
-libopus_get_size.__doc__ = 'Gets the size of an OpusProjectionDecoder structure'
+libopus_get_size.__doc__ = 'Gets the size of an OpusMSEncoder structure'
 
 
-libopus_create = opuslib.api.libopus.opus_projection_decoder_create
+libopus_create = pylibopus.api.libopus.opus_multistream_decoder_create
 libopus_create.argtypes = (
     ctypes.c_int,  # fs
     ctypes.c_int,  # channels
     ctypes.c_int,  # streams
     ctypes.c_int,  # coupled streams
-    opuslib.api.c_ubyte_pointer,  # demixing_matrix
-    ctypes.c_int,  # demixing_matrix_size
-    opuslib.api.c_int_pointer  # error
+    pylibopus.api.c_ubyte_pointer,  # mapping
+    pylibopus.api.c_int_pointer  # error
 )
-libopus_create.restype = ProjectionDecoderPointer
+libopus_create.restype = MultiStreamDecoderPointer
 
 
 def create_state(fs: int, channels: int, streams: int, coupled_streams: int,
-                 demixing_matrix: list) -> ctypes.Structure:
+                 mapping: list) -> ctypes.Structure:
     """
     Allocates and initializes a decoder state.
+    Wrapper for C opus_decoder_create()
 
     `fs` must be one of 8000, 12000, 16000, 24000, or 48000.
+
+    Internally Opus stores data at 48000 Hz, so that should be the default
+    value for Fs. However, the decoder can efficiently decode to buffers
+    at 8, 12, 16, and 24 kHz so if for some reason the caller cannot use data
+    at the full sample rate, or knows the compressed data doesn't use the full
+    frequency range, it can request decoding at a reduced rate. Likewise, the
+    decoder is capable of filling in either mono or interleaved stereo pcm
+    buffers, at the caller's request.
 
     :param fs: Sample rate to decode at (Hz).
     """
     result_code = ctypes.c_int()
-    _udemixing_matrix = (ctypes.c_ubyte * len(demixing_matrix))(*demixing_matrix)
-    demixing_matrix_size = ctypes.c_int(len(demixing_matrix))
+    _umapping = (ctypes.c_ubyte * len(mapping))(*mapping)
 
     decoder_state = libopus_create(
         fs,
         channels,
         streams,
         coupled_streams,
-        _udemixing_matrix,
-        demixing_matrix_size,
+        _umapping,
         ctypes.byref(result_code)
     )
 
-    if result_code.value != opuslib.OK:
-        raise opuslib.exceptions.OpusError(result_code.value)
+    if result_code.value != pylibopus.OK:
+        raise pylibopus.exceptions.OpusError(result_code.value)
 
     return decoder_state
 
 
-libopus_decode = opuslib.api.libopus.opus_projection_decode
+libopus_decode = pylibopus.api.libopus.opus_multistream_decode
 libopus_decode.argtypes = (
-    ProjectionDecoderPointer,
+    MultiStreamDecoderPointer,
     ctypes.c_char_p,
     ctypes.c_int32,
-    opuslib.api.c_int16_pointer,
+    pylibopus.api.c_int16_pointer,
     ctypes.c_int,
     ctypes.c_int
 )
@@ -109,7 +115,7 @@ def decode(  # pylint: disable=too-many-arguments
 
     pcm_size = frame_size * channels * ctypes.sizeof(ctypes.c_int16)
     pcm = (ctypes.c_int16 * pcm_size)()
-    pcm_pointer = ctypes.cast(pcm, opuslib.api.c_int16_pointer)
+    pcm_pointer = ctypes.cast(pcm, pylibopus.api.c_int16_pointer)
 
     result = libopus_decode(
         decoder_state,
@@ -121,17 +127,17 @@ def decode(  # pylint: disable=too-many-arguments
     )
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return array.array('h', pcm_pointer[:result * channels]).tobytes()
 
 
-libopus_decode_float = opuslib.api.libopus.opus_projection_decode_float
+libopus_decode_float = pylibopus.api.libopus.opus_multistream_decode_float
 libopus_decode_float.argtypes = (
-    ProjectionDecoderPointer,
+    MultiStreamDecoderPointer,
     ctypes.c_char_p,
     ctypes.c_int32,
-    opuslib.api.c_float_pointer,
+    pylibopus.api.c_float_pointer,
     ctypes.c_int,
     ctypes.c_int
 )
@@ -157,7 +163,7 @@ def decode_float(  # pylint: disable=too-many-arguments
 
     pcm_size = frame_size * channels * ctypes.sizeof(ctypes.c_float)
     pcm = (ctypes.c_float * pcm_size)()
-    pcm_pointer = ctypes.cast(pcm, opuslib.api.c_float_pointer)
+    pcm_pointer = ctypes.cast(pcm, pylibopus.api.c_float_pointer)
 
     result = libopus_decode_float(
         decoder_state,
@@ -169,13 +175,13 @@ def decode_float(  # pylint: disable=too-many-arguments
     )
 
     if result < 0:
-        raise opuslib.exceptions.OpusError(result)
+        raise pylibopus.exceptions.OpusError(result)
 
     return array.array('f', pcm[:result * channels]).tobytes()
 
 
-libopus_ctl = opuslib.api.libopus.opus_projection_decoder_ctl
-libopus_ctl.argtypes = [ProjectionDecoderPointer, ctypes.c_int,]  # variadic
+libopus_ctl = pylibopus.api.libopus.opus_multistream_decoder_ctl
+libopus_ctl.argtypes = [MultiStreamDecoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
 
@@ -190,7 +196,7 @@ def decoder_ctl(
     return request(libopus_ctl, decoder_state)
 
 
-destroy = opuslib.api.libopus.opus_projection_decoder_destroy
-destroy.argtypes = (ProjectionDecoderPointer,)
+destroy = pylibopus.api.libopus.opus_multistream_decoder_destroy
+destroy.argtypes = (MultiStreamDecoderPointer,)
 destroy.restype = None
-destroy.__doc__ = 'Frees an OpusProjectionDecoder allocated by opus_projection_decoder_create()'
+destroy.__doc__ = 'Frees an OpusMultistreamDecoder allocated by opus_multistream_decoder_create()'

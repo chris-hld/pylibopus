@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-OpusLib constants.
+pylibopus constants.
 Matches to `opus_defines.h`
 """
 

@@ -11,8 +11,8 @@ import array
 import ctypes  # type: ignore
 import typing
 
-import opuslib
-import opuslib.api
+import pylibopus
+import pylibopus.api
 
 __author__ = 'Никита Кузнецов <self@svartalf.info>'
 __copyright__ = 'Copyright (c) 2012, SvartalF'
@@ -29,7 +29,7 @@ class Encoder(ctypes.Structure):  # pylint: disable=too-few-public-methods
 EncoderPointer = ctypes.POINTER(Encoder)
 
 
-libopus_get_size = opuslib.api.libopus.opus_encoder_get_size
+libopus_get_size = pylibopus.api.libopus.opus_encoder_get_size
 libopus_get_size.argtypes = (ctypes.c_int,)  # must be sequence (,) of types!
 libopus_get_size.restype = ctypes.c_int
 
@@ -42,12 +42,12 @@ def get_size(channels: int) -> typing.Union[int, typing.Any]:
     return libopus_get_size(channels)
 
 
-libopus_create = opuslib.api.libopus.opus_encoder_create
+libopus_create = pylibopus.api.libopus.opus_encoder_create
 libopus_create.argtypes = (
     ctypes.c_int,
     ctypes.c_int,
     ctypes.c_int,
-    opuslib.api.c_int_pointer
+    pylibopus.api.c_int_pointer
 )
 libopus_create.restype = EncoderPointer
 
@@ -63,16 +63,16 @@ def create_state(fs: int, channels: int, application: int) -> ctypes.Structure:
         ctypes.byref(result_code)
     )
 
-    if result_code.value != opuslib.OK:
-        raise opuslib.OpusError(result_code.value)
+    if result_code.value != pylibopus.OK:
+        raise pylibopus.OpusError(result_code.value)
 
     return result
 
 
-libopus_encode = opuslib.api.libopus.opus_encode
+libopus_encode = pylibopus.api.libopus.opus_encode
 libopus_encode.argtypes = (
     EncoderPointer,
-    opuslib.api.c_int16_pointer,
+    pylibopus.api.c_int16_pointer,
     ctypes.c_int,
     ctypes.c_char_p,
     ctypes.c_int32
@@ -109,7 +109,7 @@ def encode(
         instant bitrate, but should not be used as the only bitrate control.
         Use OPUS_SET_BITRATE to control the bitrate.
     """
-    pcm_pointer = ctypes.cast(pcm_data, opuslib.api.c_int16_pointer)
+    pcm_pointer = ctypes.cast(pcm_data, pylibopus.api.c_int16_pointer)
     opus_data = (ctypes.c_char * max_data_bytes)()
 
     result = libopus_encode(
@@ -121,16 +121,16 @@ def encode(
     )
 
     if result < 0:
-        raise opuslib.OpusError(
+        raise pylibopus.OpusError(
             'Opus Encoder returned result="{}"'.format(result))
 
     return array.array('b', opus_data[:result]).tobytes()
 
 
-libopus_encode_float = opuslib.api.libopus.opus_encode_float
+libopus_encode_float = pylibopus.api.libopus.opus_encode_float
 libopus_encode_float.argtypes = (
     EncoderPointer,
-    opuslib.api.c_float_pointer,
+    pylibopus.api.c_float_pointer,
     ctypes.c_int,
     ctypes.c_char_p,
     ctypes.c_int32
@@ -146,7 +146,7 @@ def encode_float(
         max_data_bytes: int
 ) -> typing.Union[bytes, typing.Any]:
     """Encodes an Opus frame from floating point input"""
-    pcm_pointer = ctypes.cast(pcm_data, opuslib.api.c_float_pointer)
+    pcm_pointer = ctypes.cast(pcm_data, pylibopus.api.c_float_pointer)
     opus_data = (ctypes.c_char * max_data_bytes)()
 
     result = libopus_encode_float(
@@ -158,13 +158,13 @@ def encode_float(
     )
 
     if result < 0:
-        raise opuslib.OpusError(
+        raise pylibopus.OpusError(
             'Encoder returned result="{}"'.format(result))
 
     return array.array('b', opus_data[:result]).tobytes()
 
 
-libopus_ctl = opuslib.api.libopus.opus_encoder_ctl
+libopus_ctl = pylibopus.api.libopus.opus_encoder_ctl
 libopus_ctl.argtypes = [EncoderPointer, ctypes.c_int,]  # variadic
 libopus_ctl.restype = ctypes.c_int
 
@@ -180,7 +180,7 @@ def encoder_ctl(
     return request(libopus_ctl, encoder_state)
 
 
-destroy = opuslib.api.libopus.opus_encoder_destroy
+destroy = pylibopus.api.libopus.opus_encoder_destroy
 destroy.argtypes = (EncoderPointer,)  # must be sequence (,) of types!
 destroy.restype = None
 destroy.__doc__ = "Frees an OpusEncoder allocated by opus_encoder_create()"

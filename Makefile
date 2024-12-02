@@ -1,4 +1,4 @@
-# Makefile for opuslib.
+# Makefile for pylibopus.
 #
 # Author:: Никита Кузнецов <self@svartalf.info>
 # Copyright:: Copyright (c) 2012, SvartalF
@@ -21,7 +21,7 @@ install_requirements_test:
 	pip install -r requirements_test.txt
 
 uninstall:
-	pip uninstall -y opuslib
+	pip uninstall -y pylibopus
 
 reinstall: uninstall develop
 
@@ -46,14 +46,14 @@ nosetests: remember_test
 flake8: pep8
 
 pep8: remember_test
-	flake8 --ignore=E402,E731 --max-complexity 12 --exit-zero opuslib/*.py \
-	opuslib/api/*.py tests/*.py
+	flake8 --ignore=E402,E731 --max-complexity 12 --exit-zero pylibopus/*.py \
+	pylibopus/api/*.py tests/*.py
 
 pylint: lint
 
 lint: remember_test
 	pylint --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" \
-	-r n opuslib/*.py opuslib/api/*.py tests/*.py || exit 0
+	-r n pylibopus/*.py pylibopus/api/*.py tests/*.py || exit 0
 
 test: lint pep8 mypy nosetests
 

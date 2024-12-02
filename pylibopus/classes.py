@@ -5,15 +5,15 @@
 
 import typing
 
-import opuslib
-import opuslib.api
-import opuslib.api.ctl
-import opuslib.api.decoder
-import opuslib.api.encoder
-import opuslib.api.multistream_encoder
-import opuslib.api.multistream_decoder
-import opuslib.api.projection_encoder
-import opuslib.api.projection_decoder
+import pylibopus
+import pylibopus.api
+import pylibopus.api.ctl
+import pylibopus.api.decoder
+import pylibopus.api.encoder
+import pylibopus.api.multistream_encoder
+import pylibopus.api.multistream_decoder
+import pylibopus.api.projection_encoder
+import pylibopus.api.projection_decoder
 
 
 __author__ = 'Никита Кузнецов <self@svartalf.info>'
@@ -32,9 +32,9 @@ class Encoder(object):
             channels : number of channels
         """
         # Check to see if the Encoder Application Macro is available:
-        if application in list(opuslib.APPLICATION_TYPES_MAP.keys()):
-            application = opuslib.APPLICATION_TYPES_MAP[application]
-        elif application in list(opuslib.APPLICATION_TYPES_MAP.values()):
+        if application in list(pylibopus.APPLICATION_TYPES_MAP.keys()):
+            application = pylibopus.APPLICATION_TYPES_MAP[application]
+        elif application in list(pylibopus.APPLICATION_TYPES_MAP.values()):
             pass  # Nothing to do here
         else:
             raise ValueError(
@@ -44,26 +44,26 @@ class Encoder(object):
         self._fs = fs
         self._channels = channels
         self._application = application
-        self.encoder_state = opuslib.api.encoder.create_state(
+        self.encoder_state = pylibopus.api.encoder.create_state(
             fs, channels, application)
 
     def __del__(self) -> None:
         if hasattr(self, 'encoder_state'):
             # Destroying state only if __init__ completed successfully
-            opuslib.api.encoder.destroy(self.encoder_state)
+            pylibopus.api.encoder.destroy(self.encoder_state)
 
     def reset_state(self) -> None:
         """
         Resets the codec state to be equivalent to a freshly initialized state
         """
-        opuslib.api.encoder.encoder_ctl(
-            self.encoder_state, opuslib.api.ctl.reset_state)
+        pylibopus.api.encoder.encoder_ctl(
+            self.encoder_state, pylibopus.api.ctl.reset_state)
 
     def encode(self, pcm_data: bytes, frame_size: int) -> bytes:
         """
         Encodes given PCM data as Opus.
         """
-        return opuslib.api.encoder.encode(
+        return pylibopus.api.encoder.encode(
             self.encoder_state,
             pcm_data,
             frame_size,
@@ -74,7 +74,7 @@ class Encoder(object):
         """
         Encodes given PCM data as Opus.
         """
-        return opuslib.api.encoder.encode_float(
+        return pylibopus.api.encoder.encode_float(
             self.encoder_state,
             pcm_data,
             frame_size,
@@ -83,131 +83,131 @@ class Encoder(object):
 
     # CTL interfaces
 
-    def _get_final_range(self): return opuslib.api.encoder.encoder_ctl(
+    def _get_final_range(self): return pylibopus.api.encoder.encoder_ctl(
         self.encoder_state,
-        opuslib.api.ctl.get_final_range
+        pylibopus.api.ctl.get_final_range
     )
 
     final_range = property(_get_final_range)
 
-    def _get_bandwidth(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_bandwidth)
+    def _get_bandwidth(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_bandwidth)
 
     bandwidth = property(_get_bandwidth)
 
-    def _get_pitch(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_pitch)
+    def _get_pitch(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_pitch)
 
     pitch = property(_get_pitch)
 
-    def _get_lsb_depth(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_lsb_depth)
+    def _get_lsb_depth(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_lsb_depth)
 
-    def _set_lsb_depth(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_lsb_depth, x)
+    def _set_lsb_depth(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_lsb_depth, x)
 
     lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
 
-    def _get_complexity(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_complexity)
+    def _get_complexity(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_complexity)
 
-    def _set_complexity(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_complexity, x)
+    def _set_complexity(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_complexity, x)
 
     complexity = property(_get_complexity, _set_complexity)
 
-    def _get_bitrate(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_bitrate)
+    def _get_bitrate(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_bitrate)
 
-    def _set_bitrate(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_bitrate, x)
+    def _set_bitrate(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_bitrate, x)
 
     bitrate = property(_get_bitrate, _set_bitrate)
 
-    def _get_vbr(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_vbr)
+    def _get_vbr(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_vbr)
 
-    def _set_vbr(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_vbr, x)
+    def _set_vbr(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_vbr, x)
 
     vbr = property(_get_vbr, _set_vbr)
 
-    def _get_vbr_constraint(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_vbr_constraint)
+    def _get_vbr_constraint(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_vbr_constraint)
 
-    def _set_vbr_constraint(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_vbr_constraint, x)
+    def _set_vbr_constraint(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_vbr_constraint, x)
 
     vbr_constraint = property(_get_vbr_constraint, _set_vbr_constraint)
 
-    def _get_force_channels(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_force_channels)
+    def _get_force_channels(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_force_channels)
 
-    def _set_force_channels(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_force_channels, x)
+    def _set_force_channels(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_force_channels, x)
 
     force_channels = property(_get_force_channels, _set_force_channels)
 
-    def _get_max_bandwidth(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_max_bandwidth)
+    def _get_max_bandwidth(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_max_bandwidth)
 
-    def _set_max_bandwidth(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_max_bandwidth, x)
+    def _set_max_bandwidth(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_max_bandwidth, x)
 
     max_bandwidth = property(_get_max_bandwidth, _set_max_bandwidth)
 
-    def _set_bandwidth(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_bandwidth, x)
+    def _set_bandwidth(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_bandwidth, x)
 
     bandwidth = property(None, _set_bandwidth)
 
-    def _get_signal(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_signal)
+    def _get_signal(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_signal)
 
-    def _set_signal(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_signal, x)
+    def _set_signal(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_signal, x)
 
     signal = property(_get_signal, _set_signal)
 
-    def _get_application(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_application)
+    def _get_application(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_application)
 
-    def _set_application(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_application, x)
+    def _set_application(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_application, x)
 
     application = property(_get_application, _set_application)
 
-    def _get_sample_rate(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_sample_rate)
+    def _get_sample_rate(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_sample_rate)
 
     sample_rate = property(_get_sample_rate)
 
-    def _get_lookahead(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_lookahead)
+    def _get_lookahead(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_lookahead)
 
     lookahead = property(_get_lookahead)
 
-    def _get_inband_fec(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_inband_fec)
+    def _get_inband_fec(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_inband_fec)
 
-    def _set_inband_fec(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_inband_fec, x)
+    def _set_inband_fec(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_inband_fec, x)
 
     inband_fec = property(_get_inband_fec, _set_inband_fec)
 
-    def _get_packet_loss_perc(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_packet_loss_perc)
+    def _get_packet_loss_perc(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_packet_loss_perc)
 
-    def _set_packet_loss_perc(self, x): return opuslib.api.encoder.encoder_ctl(
-            self.encoder_state, opuslib.api.ctl.set_packet_loss_perc, x)
+    def _set_packet_loss_perc(self, x): return pylibopus.api.encoder.encoder_ctl(
+            self.encoder_state, pylibopus.api.ctl.set_packet_loss_perc, x)
 
     packet_loss_perc = property(_get_packet_loss_perc, _set_packet_loss_perc)
 
-    def _get_dtx(self): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.get_dtx)
+    def _get_dtx(self): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.get_dtx)
 
-    def _set_dtx(self, x): return opuslib.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib.api.ctl.set_dtx, x)
+    def _set_dtx(self, x): return pylibopus.api.encoder.encoder_ctl(
+        self.encoder_state, pylibopus.api.ctl.set_dtx, x)
 
     dtx = property(_get_dtx, _set_dtx)
 
@@ -223,20 +223,20 @@ class Decoder(object):
         """
         self._fs = fs
         self._channels = channels
-        self.decoder_state = opuslib.api.decoder.create_state(fs, channels)
+        self.decoder_state = pylibopus.api.decoder.create_state(fs, channels)
 
     def __del__(self) -> None:
         if hasattr(self, 'decoder_state'):
             # Destroying state only if __init__ completed successfully
-            opuslib.api.decoder.destroy(self.decoder_state)
+            pylibopus.api.decoder.destroy(self.decoder_state)
 
     def reset_state(self) -> None:
         """
         Resets the codec state to be equivalent to a freshly initialized state
         """
-        opuslib.api.decoder.decoder_ctl(
+        pylibopus.api.decoder.decoder_ctl(
             self.decoder_state,
-            opuslib.api.ctl.reset_state
+            pylibopus.api.ctl.reset_state
         )
 
     # FIXME: Remove typing.Any once we have a stub for ctypes
@@ -249,7 +249,7 @@ class Decoder(object):
         """
         Decodes given Opus data to PCM.
         """
-        return opuslib.api.decoder.decode(
+        return pylibopus.api.decoder.decode(
             self.decoder_state,
             opus_data,
             len(opus_data),
@@ -268,7 +268,7 @@ class Decoder(object):
         """
         Decodes given Opus data to PCM.
         """
-        return opuslib.api.decoder.decode_float(
+        return pylibopus.api.decoder.decode_float(
             self.decoder_state,
             opus_data,
             len(opus_data),
@@ -279,48 +279,48 @@ class Decoder(object):
 
     # CTL interfaces
 
-    def _get_final_range(self): return opuslib.api.decoder.decoder_ctl(
+    def _get_final_range(self): return pylibopus.api.decoder.decoder_ctl(
         self.decoder_state,
-        opuslib.api.ctl.get_final_range
+        pylibopus.api.ctl.get_final_range
     )
 
     final_range = property(_get_final_range)
 
-    def _get_bandwidth(self): return opuslib.api.decoder.decoder_ctl(
+    def _get_bandwidth(self): return pylibopus.api.decoder.decoder_ctl(
         self.decoder_state,
-        opuslib.api.ctl.get_bandwidth
+        pylibopus.api.ctl.get_bandwidth
     )
 
     bandwidth = property(_get_bandwidth)
 
-    def _get_pitch(self): return opuslib.api.decoder.decoder_ctl(
+    def _get_pitch(self): return pylibopus.api.decoder.decoder_ctl(
         self.decoder_state,
-        opuslib.api.ctl.get_pitch
+        pylibopus.api.ctl.get_pitch
     )
 
     pitch = property(_get_pitch)
 
-    def _get_lsb_depth(self): return opuslib.api.decoder.decoder_ctl(
+    def _get_lsb_depth(self): return pylibopus.api.decoder.decoder_ctl(
         self.decoder_state,
-        opuslib.api.ctl.get_lsb_depth
+        pylibopus.api.ctl.get_lsb_depth
     )
 
-    def _set_lsb_depth(self, x): return opuslib.api.decoder.decoder_ctl(
+    def _set_lsb_depth(self, x): return pylibopus.api.decoder.decoder_ctl(
         self.decoder_state,
-        opuslib.api.ctl.set_lsb_depth,
+        pylibopus.api.ctl.set_lsb_depth,
         x
     )
 
     lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
 
-    def _get_gain(self): return opuslib.api.decoder.decoder_ctl(
+    def _get_gain(self): return pylibopus.api.decoder.decoder_ctl(
         self.decoder_state,
-        opuslib.api.ctl.get_gain
+        pylibopus.api.ctl.get_gain
     )
 
-    def _set_gain(self, x): return opuslib.api.decoder.decoder_ctl(
+    def _set_gain(self, x): return pylibopus.api.decoder.decoder_ctl(
         self.decoder_state,
-        opuslib.api.ctl.set_gain,
+        pylibopus.api.ctl.set_gain,
         x
     )
 
@@ -339,9 +339,9 @@ class MultiStreamEncoder(object):
             channels : number of channels
         """
         # Check to see if the Encoder Application Macro is available:
-        if application in list(opuslib.APPLICATION_TYPES_MAP.keys()):
-            application = opuslib.APPLICATION_TYPES_MAP[application]
-        elif application in list(opuslib.APPLICATION_TYPES_MAP.values()):
+        if application in list(pylibopus.APPLICATION_TYPES_MAP.keys()):
+            application = pylibopus.APPLICATION_TYPES_MAP[application]
+        elif application in list(pylibopus.APPLICATION_TYPES_MAP.values()):
             pass  # Nothing to do here
         else:
             raise ValueError(
@@ -354,27 +354,27 @@ class MultiStreamEncoder(object):
         self._coupled_streams = coupled_streams
         self._mapping = mapping
         self._application = application
-        self.msencoder_state = opuslib.api.multistream_encoder.create_state(
+        self.msencoder_state = pylibopus.api.multistream_encoder.create_state(
             self._fs, self._channels, self._streams, self._coupled_streams,
             self._mapping, self._application)
 
     def __del__(self) -> None:
         if hasattr(self, 'msencoder_state'):
             # Destroying state only if __init__ completed successfully
-            opuslib.api.multistream_encoder.destroy(self.msencoder_state)
+            pylibopus.api.multistream_encoder.destroy(self.msencoder_state)
 
     def reset_state(self) -> None:
         """
         Resets the codec state to be equivalent to a freshly initialized state
         """
-        opuslib.api.multistream_encoder.encoder_ctl(
-            self.msencoder_state, opuslib.api.ctl.reset_state)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, pylibopus.api.ctl.reset_state)
 
     def encode(self, pcm_data: bytes, frame_size: int) -> bytes:
         """
         Encodes given PCM data as Opus.
         """
-        return opuslib.api.multistream_encoder.encode(
+        return pylibopus.api.multistream_encoder.encode(
             self.msencoder_state,
             pcm_data,
             frame_size,
@@ -385,7 +385,7 @@ class MultiStreamEncoder(object):
         """
         Encodes given PCM data as Opus.
         """
-        return opuslib.api.multistream_encoder.encode_float(
+        return pylibopus.api.multistream_encoder.encode_float(
             self.msencoder_state,
             pcm_data,
             frame_size,
@@ -395,160 +395,160 @@ class MultiStreamEncoder(object):
     # CTL interfaces
 
     def _get_final_range(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
+        pylibopus.api.multistream_encoder.encoder_ctl(
         self.msencoder_state,
-        opuslib.api.ctl.get_final_range
+        pylibopus.api.ctl.get_final_range
     )
 
     final_range = property(_get_final_range)
 
     def _get_bandwidth(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_bandwidth)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_bandwidth)
 
     bandwidth = property(_get_bandwidth)
 
     def _get_pitch(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_pitch)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_pitch)
 
     pitch = property(_get_pitch)
 
     def _get_lsb_depth(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_lsb_depth)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_lsb_depth)
 
     def _set_lsb_depth(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_lsb_depth, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_lsb_depth, x)
 
     lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
 
     def _get_complexity(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_complexity)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_complexity)
 
     def _set_complexity(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_complexity, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_complexity, x)
 
     complexity = property(_get_complexity, _set_complexity)
 
     def _get_bitrate(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_bitrate)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_bitrate)
 
     def _set_bitrate(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_bitrate, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_bitrate, x)
 
     bitrate = property(_get_bitrate, _set_bitrate)
 
     def _get_vbr(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_vbr)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_vbr)
 
     def _set_vbr(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_vbr, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_vbr, x)
 
     vbr = property(_get_vbr, _set_vbr)
 
     def _get_vbr_constraint(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_vbr_constraint)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_vbr_constraint)
 
     def _set_vbr_constraint(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_vbr_constraint, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_vbr_constraint, x)
 
     vbr_constraint = property(_get_vbr_constraint, _set_vbr_constraint)
 
     def _get_force_channels(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_force_channels)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_force_channels)
 
     def _set_force_channels(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_force_channels, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_force_channels, x)
 
     force_channels = property(_get_force_channels, _set_force_channels)
 
     def _get_max_bandwidth(self): return \
-        opuslib.api.encoder.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_max_bandwidth)
+        pylibopus.api.encoder.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_max_bandwidth)
 
     def _set_max_bandwidth(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_max_bandwidth, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_max_bandwidth, x)
 
     max_bandwidth = property(_get_max_bandwidth, _set_max_bandwidth)
 
     def _set_bandwidth(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_bandwidth, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_bandwidth, x)
 
     bandwidth = property(None, _set_bandwidth)
 
     def _get_signal(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_signal)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_signal)
 
     def _set_signal(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_signal, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_signal, x)
 
     signal = property(_get_signal, _set_signal)
 
     def _get_application(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_application)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_application)
 
     def _set_application(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_application, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_application, x)
 
     application = property(_get_application, _set_application)
 
     def _get_sample_rate(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_sample_rate)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_sample_rate)
 
     sample_rate = property(_get_sample_rate)
 
     def _get_lookahead(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_lookahead)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_lookahead)
 
     lookahead = property(_get_lookahead)
 
     def _get_inband_fec(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_inband_fec)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_inband_fec)
 
     def _set_inband_fec(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_inband_fec, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_inband_fec, x)
 
     inband_fec = property(_get_inband_fec, _set_inband_fec)
 
     def _get_packet_loss_perc(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_packet_loss_perc)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_packet_loss_perc)
 
     def _set_packet_loss_perc(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_packet_loss_perc, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_packet_loss_perc, x)
 
     packet_loss_perc = property(_get_packet_loss_perc, _set_packet_loss_perc)
 
     def _get_dtx(self): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.get_dtx)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.get_dtx)
 
     def _set_dtx(self, x): return \
-        opuslib.api.multistream_encoder.encoder_ctl(
-        self.msencoder_state, opuslib.api.ctl.set_dtx, x)
+        pylibopus.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, pylibopus.api.ctl.set_dtx, x)
 
     dtx = property(_get_dtx, _set_dtx)
 
@@ -567,22 +567,22 @@ class MultiStreamDecoder(object):
         self._streams = streams
         self._coupled_streams = coupled_streams
         self._mapping = mapping
-        self.msdecoder_state = opuslib.api.multistream_decoder.create_state(
+        self.msdecoder_state = pylibopus.api.multistream_decoder.create_state(
             self._fs, self._channels, self._streams, self._coupled_streams,
             self._mapping)
 
     def __del__(self) -> None:
         if hasattr(self, 'msdecoder_state'):
             # Destroying state only if __init__ completed successfully
-            opuslib.api.multistream_decoder.destroy(self.msdecoder_state)
+            pylibopus.api.multistream_decoder.destroy(self.msdecoder_state)
 
     def reset_state(self) -> None:
         """
         Resets the codec state to be equivalent to a freshly initialized state
         """
-        opuslib.api.multistream_decoder.decoder_ctl(
+        pylibopus.api.multistream_decoder.decoder_ctl(
             self.msdecoder_state,
-            opuslib.api.ctl.reset_state
+            pylibopus.api.ctl.reset_state
         )
 
     # FIXME: Remove typing.Any once we have a stub for ctypes
@@ -595,7 +595,7 @@ class MultiStreamDecoder(object):
         """
         Decodes given Opus data to PCM.
         """
-        return opuslib.api.multistream_decoder.decode(
+        return pylibopus.api.multistream_decoder.decode(
             self.msdecoder_state,
             opus_data,
             len(opus_data),
@@ -614,7 +614,7 @@ class MultiStreamDecoder(object):
         """
         Decodes given Opus data to PCM.
         """
-        return opuslib.api.multistream_decoder.decode_float(
+        return pylibopus.api.multistream_decoder.decode_float(
             self.msdecoder_state,
             opus_data,
             len(opus_data),
@@ -626,40 +626,40 @@ class MultiStreamDecoder(object):
     # CTL interfaces
 
     def _get_final_range(self): return \
-        opuslib.api.multistream_decoder.decoder_ctl(
-        self.msdecoder_state, opuslib.api.ctl.get_final_range)
+        pylibopus.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, pylibopus.api.ctl.get_final_range)
 
     final_range = property(_get_final_range)
 
     def _get_bandwidth(self): return \
-        opuslib.api.multistream_decoder.decoder_ctl(
-        self.msdecoder_state, opuslib.api.ctl.get_bandwidth)
+        pylibopus.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, pylibopus.api.ctl.get_bandwidth)
 
     bandwidth = property(_get_bandwidth)
 
     def _get_pitch(self): return \
-        opuslib.api.multistream_decoder.decoder_ctl(
-        self.msdecoder_state, opuslib.api.ctl.get_pitch)
+        pylibopus.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, pylibopus.api.ctl.get_pitch)
 
     pitch = property(_get_pitch)
 
     def _get_lsb_depth(self): return \
-        opuslib.api.multistream_decoder.decoder_ctl(
-        self.msdecoder_state, opuslib.api.ctl.get_lsb_depth)
+        pylibopus.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, pylibopus.api.ctl.get_lsb_depth)
 
     def _set_lsb_depth(self, x): return \
-        opuslib.api.multistream_decoder.decoder_ctl(
-        self.msdecoder_state, opuslib.api.ctl.set_lsb_depth, x)
+        pylibopus.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, pylibopus.api.ctl.set_lsb_depth, x)
 
     lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
 
     def _get_gain(self): return \
-        opuslib.api.multistream_decoder.decoder_ctl(
-        self.msdecoder_state, opuslib.api.ctl.get_gain)
+        pylibopus.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, pylibopus.api.ctl.get_gain)
 
     def _set_gain(self, x): return \
-        opuslib.api.multistream_decoder.decoder_ctl(
-        self.msdecoder_state, opuslib.api.ctl.set_gain, x)
+        pylibopus.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, pylibopus.api.ctl.set_gain, x)
 
     gain = property(_get_gain, _set_gain)
 
@@ -675,9 +675,9 @@ class ProjectionEncoder(object):
             channels : number of channels
         """
         # Check to see if the Encoder Application Macro is available:
-        if application in list(opuslib.APPLICATION_TYPES_MAP.keys()):
-            application = opuslib.APPLICATION_TYPES_MAP[application]
-        elif application in list(opuslib.APPLICATION_TYPES_MAP.values()):
+        if application in list(pylibopus.APPLICATION_TYPES_MAP.keys()):
+            application = pylibopus.APPLICATION_TYPES_MAP[application]
+        elif application in list(pylibopus.APPLICATION_TYPES_MAP.values()):
             pass  # Nothing to do here
         else:
             raise ValueError(
@@ -690,27 +690,27 @@ class ProjectionEncoder(object):
         self._streams = streams
         self._coupled_streams = coupled_streams
         self._application = application
-        self.projencoder_state = opuslib.api.projection_encoder.create_state(
+        self.projencoder_state = pylibopus.api.projection_encoder.create_state(
             self._fs, self._channels, self._mapping_family, self._streams,
             self._coupled_streams, self._application)
 
     def __del__(self) -> None:
         if hasattr(self, 'projencoder_state'):
             # Destroying state only if __init__ completed successfully
-            opuslib.api.projection_encoder.destroy(self.projencoder_state)
+            pylibopus.api.projection_encoder.destroy(self.projencoder_state)
 
     def reset_state(self) -> None:
         """
         Resets the codec state to be equivalent to a freshly initialized state
         """
-        opuslib.api.projection_encoder.encoder_ctl(
-            self.projencoder_state, opuslib.api.ctl.reset_state)
+        pylibopus.api.projection_encoder.encoder_ctl(
+            self.projencoder_state, pylibopus.api.ctl.reset_state)
 
     def encode(self, pcm_data: bytes, frame_size: int) -> bytes:
         """
         Encodes given PCM data as Opus.
         """
-        return opuslib.api.projection_encoder.encode(
+        return pylibopus.api.projection_encoder.encode(
             self.projencoder_state,
             pcm_data,
             frame_size,
@@ -721,7 +721,7 @@ class ProjectionEncoder(object):
         """
         Encodes given PCM data as Opus.
         """
-        return opuslib.api.projection_encoder.encode_float(
+        return pylibopus.api.projection_encoder.encode_float(
             self.projencoder_state,
             pcm_data,
             frame_size,
@@ -732,171 +732,171 @@ class ProjectionEncoder(object):
     # CTL interfaces
 
     def _get_final_range(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
+        pylibopus.api.projection_encoder.encoder_ctl(
         self.projencoder_state,
-        opuslib.api.ctl.get_final_range
+        pylibopus.api.ctl.get_final_range
     )
 
     final_range = property(_get_final_range)
 
     def _get_bandwidth(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_bandwidth)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_bandwidth)
 
     bandwidth = property(_get_bandwidth)
 
     def _get_pitch(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_pitch)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_pitch)
 
     pitch = property(_get_pitch)
 
     def _get_lsb_depth(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_lsb_depth)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_lsb_depth)
 
     def _set_lsb_depth(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_lsb_depth, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_lsb_depth, x)
 
     lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
 
     def _get_complexity(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_complexity)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_complexity)
 
     def _set_complexity(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_complexity, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_complexity, x)
 
     complexity = property(_get_complexity, _set_complexity)
 
     def _get_bitrate(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_bitrate)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_bitrate)
 
     def _set_bitrate(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_bitrate, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_bitrate, x)
 
     bitrate = property(_get_bitrate, _set_bitrate)
 
     def _get_vbr(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_vbr)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_vbr)
 
     def _set_vbr(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_vbr, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_vbr, x)
 
     vbr = property(_get_vbr, _set_vbr)
 
     def _get_vbr_constraint(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_vbr_constraint)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_vbr_constraint)
 
     def _set_vbr_constraint(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_vbr_constraint, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_vbr_constraint, x)
 
     vbr_constraint = property(_get_vbr_constraint, _set_vbr_constraint)
 
     def _get_force_channels(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_force_channels)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_force_channels)
 
     def _set_force_channels(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_force_channels, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_force_channels, x)
 
     force_channels = property(_get_force_channels, _set_force_channels)
 
     def _get_max_bandwidth(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_max_bandwidth)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_max_bandwidth)
 
     def _set_max_bandwidth(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_max_bandwidth, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_max_bandwidth, x)
 
     max_bandwidth = property(_get_max_bandwidth, _set_max_bandwidth)
 
     def _set_bandwidth(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_bandwidth, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_bandwidth, x)
 
     bandwidth = property(None, _set_bandwidth)
 
     def _get_signal(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_signal)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_signal)
 
     def _set_signal(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_signal, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_signal, x)
 
     signal = property(_get_signal, _set_signal)
 
     def _get_application(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_application)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_application)
 
     def _set_application(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_application, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_application, x)
 
     application = property(_get_application, _set_application)
 
     def _get_sample_rate(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_sample_rate)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_sample_rate)
 
     sample_rate = property(_get_sample_rate)
 
     def _get_lookahead(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_lookahead)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_lookahead)
 
     lookahead = property(_get_lookahead)
 
     def _get_inband_fec(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_inband_fec)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_inband_fec)
 
     def _set_inband_fec(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_inband_fec, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_inband_fec, x)
 
     inband_fec = property(_get_inband_fec, _set_inband_fec)
 
     def _get_packet_loss_perc(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_packet_loss_perc)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_packet_loss_perc)
 
     def _set_packet_loss_perc(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_packet_loss_perc, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_packet_loss_perc, x)
 
     packet_loss_perc = property(_get_packet_loss_perc, _set_packet_loss_perc)
 
     def _get_dtx(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_dtx)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_dtx)
 
     def _set_dtx(self, x): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.set_dtx, x)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.set_dtx, x)
 
     dtx = property(_get_dtx, _set_dtx)
 
     def _get_demixing_matrix_size(self): return \
-        opuslib.api.projection_encoder.encoder_ctl(
-        self.projencoder_state, opuslib.api.ctl.get_demixing_matrix_size)
+        pylibopus.api.projection_encoder.encoder_ctl(
+        self.projencoder_state, pylibopus.api.ctl.get_demixing_matrix_size)
 
     demixing_matrix_size = property(_get_demixing_matrix_size)
 
     def get_demixing_matrix(self, matrix_size): return \
-        opuslib.api.projection_encoder.get_demixing_matrix(
+        pylibopus.api.projection_encoder.get_demixing_matrix(
         self.projencoder_state, matrix_size)
 
 
@@ -914,22 +914,22 @@ class ProjectionDecoder(object):
         self._streams = streams
         self._coupled_streams = coupled_streams
         self._demixing_matrix = demixing_matrix
-        self.projdecoder_state = opuslib.api.projection_decoder.create_state(
+        self.projdecoder_state = pylibopus.api.projection_decoder.create_state(
             self._fs, self._channels, self._streams, self._coupled_streams,
             self._demixing_matrix)
 
     def __del__(self) -> None:
         if hasattr(self, 'projdecoder_state'):
             # Destroying state only if __init__ completed successfully
-            opuslib.api.projection_decoder.destroy(self.projdecoder_state)
+            pylibopus.api.projection_decoder.destroy(self.projdecoder_state)
 
     def reset_state(self) -> None:
         """
         Resets the codec state to be equivalent to a freshly initialized state
         """
-        opuslib.api.projection_decoder.decoder_ctl(
+        pylibopus.api.projection_decoder.decoder_ctl(
             self.projdecoder_state,
-            opuslib.api.ctl.reset_state
+            pylibopus.api.ctl.reset_state
         )
 
     # FIXME: Remove typing.Any once we have a stub for ctypes
@@ -942,7 +942,7 @@ class ProjectionDecoder(object):
         """
         Decodes given Opus data to PCM.
         """
-        return opuslib.api.projection_decoder.decode(
+        return pylibopus.api.projection_decoder.decode(
             self.projdecoder_state,
             opus_data,
             len(opus_data),
@@ -961,7 +961,7 @@ class ProjectionDecoder(object):
         """
         Decodes given Opus data to PCM.
         """
-        return opuslib.api.projection_decoder.decode_float(
+        return pylibopus.api.projection_decoder.decode_float(
             self.projdecoder_state,
             opus_data,
             len(opus_data),
