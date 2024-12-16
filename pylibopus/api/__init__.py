@@ -9,10 +9,6 @@ import ctypes  # type: ignore
 
 from ctypes.util import find_library  # type: ignore
 
-__author__ = 'Никита Кузнецов <self@svartalf.info>'
-__copyright__ = 'Copyright (c) 2012, SvartalF'
-__license__ = 'BSD 3-Clause License'
-
 
 lib_location = None
 libopus = None
@@ -24,8 +20,7 @@ def set_lib(path):
         raise Exception(
             'Could not find Opus library. Make sure it is installed.')
     else:
-        global lib_location
-        global libopus
+        global lib_location, libopus
         lib_location = new_lib_location
         libopus = ctypes.CDLL(lib_location)
 
